@@ -2,6 +2,20 @@ const baileys = require('@adiwajshing/baileys');
 const Pino = require('pino');
 const { Boom } = require('@hapi/boom');
 const fs = require('fs');
+const path = require("path");
+
+let pluginsFolder = path.join(__dirname, 'plugins')
+let pluginsFilter = filename => /\.js$/.test(filename)
+global.plugins = {}
+for (let filename of fs.readFileSync(pluginsFolder).filter(pluginsFilter)) {
+  try {
+    global.plugins[filename] = require(path.join(pluginsFolder, filename))
+  } catch (e) {
+    console.log(e)
+    delete global.plugins[filename]
+  }
+}
+console.log(Object.keys(global.plugins))
 
 async function start(sesion) {
   const { state, saveState } = baileys.useSingleFileAuthState(sesion);
@@ -41,7 +55,7 @@ async function start(sesion) {
     };
   });
   sock.ev.on("messages.upsert", async (message) => {
-    await require("./plugin.js")(message, sock, store)
+    await require("./plugins.js").handler(message, sock, store)
   });
 };
 
