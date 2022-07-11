@@ -4,6 +4,10 @@ const { Boom } = require('@hapi/boom');
 const fs = require('fs');
 const path = require("path");
 
+let setting = {
+  owner: ["6287883322093@s.whatsapp.net"]
+}
+
 let pluginsFolder = path.join(__dirname, 'plugins')
 let pluginsFilter = filename => /\.js$/.test(filename)
 global.plugins = {}
@@ -55,7 +59,7 @@ async function start(sesion) {
     };
   });
   sock.ev.on("messages.upsert", async (message) => {
-    await require("./plugins.js").handler(message, sock, store)
+    await require("./plugins.js").handler(message, sock, store, setting)
   });
 };
 
