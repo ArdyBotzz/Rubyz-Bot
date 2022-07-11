@@ -1,39 +1,29 @@
-const path = require("path");
 
-/*
-@type Array pluginsFolder
-@type String child pluginsFolder
-Read a directory from folder 'plugins'
-*/
-let pluginsFolder = path.join(__dirname, 'plugins')
-/*
-@type RegExp pluginsFilter
-@type String filename
-Filter array to determine filename with javascript extension
-*/
-let pluginsFilter = filename => /\.js$/.test(filename)
-/*
-@type Object plugins
-@type String keys plugins
-Put the filename in the plugins object
-*/
-global.plugins = {}
-/*
-@type Object plugins
-@type Function value plugins
-Filling the keys filename object plugins with function
-*/
-for (let filename of fs.readFileSync(pluginsFolder).filter(pluginsFilter)) {
-  try {
-    global.plugins[filename] = require(path.join(pluginsFolder, filename))
-  } catch (e) {
-    console.log(e)
-    delete global.plugins[filename]
+
+
+module.export = {
+  async handler(message, sock, store, setting) {
+    try {
+      if (!message.messages[0]) return;
+      let timestamp = new Date()
+      let msg = message.messages[0]
+      if (!msg.message) return;
+      let type = Object.keys(msg.message)[0]
+      let from = msg.key.remoteJid;
+      let isGroup = from.endsWith("@g.us")
+      let sender = isGroup ? msg.key.participant: from;
+      let metadata = isGroup ? await sock.groupMetadata(from): ""
+      let me = sock.user.id.split(":")[0]
+      let isMeAdmin = isGroup ? metadata.participants.find(v => v.id == me).admin: ""
+      let isAdmin = isGroup ? metadata.participants.find(u => u.id == sender)?.admin: ""
+      isMeAdmin = isMeAdmin == "admin" || isMeAdmin == "superadmin"
+      isAdmin = isAdmin == "admin" || isAdmin == "superadmin"
+      let pushname = msg.pushName
+      let body = msg.message?.conversation || msg.message?.imageMessage?.caption || msg.message?.videoMessage?.caption || msg.message?.extendedTextMessage?.text || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId || msg.message?.buttonsResponseMessage?.selectedButtonId || msg.message?.templateButtonReplyMessage?.selectedId || "";
+      let args = body.trim().split(/ +/).slice(1)
+      let q = args.join(" ")
+      let command = body.slice(0).trim().split(/ +/).shift().toLowerCase()
+      let isOwner = !!setting.owner.find(o => o == sender)
+    }
   }
 }
-/*
-@type Object plugins
-@type Function value plugins
-Display the contents of the plugins object in the log
-*/
-console.log(Object.keys(global.plugins))
