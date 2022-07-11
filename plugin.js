@@ -27,6 +27,15 @@ module.export = {
       let prefix = /^[°•π÷×¶∆£¢€¥®™✓_=|~!?#$%^&.+-,\/\\©^]/.test(command) ? command.match(/^[°•π÷×¶∆£¢€¥®™✓_=|~!?#$%^&.+-,\/\\©^]/gi) : '#'
       let content = JSON.stringify(msg.message)
       let isCmd = command.startsWith(prefix)
+      
+                function reply(text) {
+                    sock.sendMessage(from, {
+                        text
+                    }, {
+                        quoted: msg
+                    })
+                }
+      
       for (let name in global.plugins) {
         let plugin = global.plugins[name]
         if (!plugin) continue
@@ -56,7 +65,8 @@ module.export = {
           isOwner,
           prefix,
           content,
-          isCmd
+          isCmd,
+          reply
         }
         try {
           await plugin.call(sock, m, extra)
