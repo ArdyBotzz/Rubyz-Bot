@@ -41,7 +41,7 @@ async function start(sesion) {
     };
   });
   sock.ev.on("messages.upsert", async (message) => {
-    await require("./message/rubyz.js")(message, sock, store)
+    await require("./plugin.js")(message, sock, store)
   });
 };
 
